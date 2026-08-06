@@ -70,7 +70,13 @@ def load_with_report(model: torch.nn.Module, ckpt_path: str):
     does not match the model's shape (load_state_dict raises a RuntimeError on
     shape mismatch regardless of strict=). Shape-mismatched keys are reported
     separately and folded into `missing` (since they were not actually loaded)."""
-    ckpt = torch.load(ckpt_path, map_location="cpu")
+    # weights_only=False is required: torch >= 2.6 flipped this default to True,
+    # which refuses checkpoints containing anything but plain tensors -- and
+    # object.pth carries non-tensor entries (args/config metadata). Passing it
+    # explicitly keeps this working identically on torch 2.5 (local) and on the
+    # newer torch a Colab runtime may ship. Only ever used on checkpoints this
+    # project downloaded or wrote itself.
+    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     source_state = _extract_state_dict(ckpt)
     source_state = {(k[7:] if k.startswith("module.") else k): v for k, v in source_state.items()}
 

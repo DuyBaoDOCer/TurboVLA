@@ -78,7 +78,11 @@ def un_normalize_action(pred_norm: np.ndarray, action_min: np.ndarray, action_ma
 
 
 def load_model_and_stats(checkpoint_path: str, device: torch.device):
-    ckpt = torch.load(checkpoint_path, map_location="cpu")
+    # weights_only=False: torch >= 2.6 defaults it to True, which would reject
+    # this checkpoint's non-tensor entries (model_config / stats / args written
+    # by finetune.py). Explicit here so eval behaves the same on local torch 2.5
+    # and on whatever newer torch a Colab runtime ships.
+    ckpt = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     config = TurboVLAConfig.from_mapping(ckpt["model_config"])
     model = build_turbovla(config)
     missing, unexpected = model.load_state_dict(ckpt["model_state_dict"], strict=True)
