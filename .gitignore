@@ -11,8 +11,10 @@ venv/
 build/
 dist/
 /data/
+/pretrained/
 playground/
 outputs/
+experiments/aloha/runs/
 checkpoints/
 weights/
 logs/
